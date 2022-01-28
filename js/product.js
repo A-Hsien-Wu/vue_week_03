@@ -70,7 +70,7 @@ const vueApp = {
             axios.post( `${this.url}/api/user/check` ).then( _response => {
                 this.apiGetProducts();
             }).catch( _error => {
-                location.href = 'index.html';
+                location.href = '../index.html';
             });
         },
         apiDeleteItem(item){   // 刪除

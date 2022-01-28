@@ -24,18 +24,18 @@ createApp({
                 axios.post( `${this.url}/admin/signin` , this.loginUser )
                     .then( response => {
                         this.btnText = 'Login';
-                        console.log('response:' , response);
+                        // console.log('response:' , response);
                         const { token , expired } = response.data;
     
                         document.cookie = `${ this.tokenName }=${ token }; expires=${ new Date(expired) }; path=/;`;   
                         // 把 token 存到網頁 cookie
                         this.token = token;
                         axios.defaults.headers.common['Authorization'] = token; // 把 token 存在 headers
-                        console.log('token:' , this.token);
-                        location.href = '/html/new-products.html';    // 前往下一頁
+                        // console.log('token:' , this.token);
+                        location.href = './html/new-products.html';    // 前往下一頁
                     }).catch( error => {
                         const errorMessage = error?.response?.data?.error;
-                        console.log('error:' , errorMessage);
+                        // console.log('error:' , errorMessage);
 
                         if( errorMessage.code === 'auth/invalid-email' ){
                             this.warning = '登入失敗! Email 格式錯誤';
@@ -56,7 +56,7 @@ createApp({
     },
     created(){ 
         this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexApiToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-        console.log('token:' , this.token);
+        // console.log('token:' , this.token);
     }
 }).mount("#app");
 
