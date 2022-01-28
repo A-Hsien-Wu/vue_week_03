@@ -1794,7 +1794,7 @@ input:checked ~ .switcher-text {
   opacity: 0.3;
   --tw-content: '';
   content: var(--tw-content);
-  background-image: url('/images/add_photo_alternate_black_48dp.svg');
+  background-image: url('../images/add_photo_alternate_black_48dp.svg');
 }
 
 .upload-box {
@@ -1821,7 +1821,7 @@ input:checked ~ .switcher-text {
   opacity: 0.3;
   --tw-content: '';
   content: var(--tw-content);
-  background-image: url('/images/delete_white_24dp.svg');
+  background-image: url('../images/delete_white_24dp.svg');
 }
 
 @font-face {
