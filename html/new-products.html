@@ -265,14 +265,14 @@
                                                     :class="{'text-red-500':uploadStatus=='fail','text-green-500':uploadStatus=='success'}" 
                                                     v-show="uploadStatus=='success'||'fail'">
                                                     {{ uploadMessage }}</span>
-                                                <img src="/images/refresh_black_24dp.svg" 
+                                                <img src="../images/refresh_black_24dp.svg" 
                                                     class="animate-spin opacity-30 text-blue-600" v-show="uploadStatus=='uploading'">
                                             </div>
                                             <div class="upload-box">
                                                 <div class="h-full w-full border-4 border-gray-300 border-dashed">
                                                     <div class="h-full w-full bg-contain bg-no-repeat bg-center opacity-30 relative
                                                         hover:bg-green-300"
-                                                        style="background-image: url(/images/cloud_upload_black_48dp.svg);">
+                                                        style="background-image: url(../images/cloud_upload_black_48dp.svg);">
 
                                                         <input type="file" id="file" placeholder="drag a file here"         
                                                             name="file-to-upload"       
@@ -292,7 +292,7 @@
                                                             <img :src="item" class="h-24 w-full object-cover rounded-lg" >
                                                             <div class="rounded-lg absolute w-full h-full inset-0 bg-contain bg-no-repeat   
                                                                 bg-center hover:bg-black hover:opacity-50 opacity-0"
-                                                                style="background-image: url(/images/delete_white_24dp.svg);"></div>
+                                                                style="background-image: url(../images/delete_white_24dp.svg);"></div>
                                                         </div>
                                                     </div>
                                                 </template>
@@ -327,7 +327,7 @@
                                                     <img :src="item" class="h-24 w-full object-cover rounded-lg" >
                                                     <div class="rounded-lg absolute w-full h-full inset-0 bg-contain 
                                                         bg-no-repeat bg-center hover:bg-black hover:opacity-50 opacity-0"
-                                                        style="background-image: url(/images/delete_white_24dp.svg);">
+                                                        style="background-image: url(../images/delete_white_24dp.svg);">
                                                     </div>
                                                 </div>
                                             </div>
