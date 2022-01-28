@@ -1,0 +1,16 @@
+body {
+    font-family: 'Poppins', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+}
+
+.bg--vertical-line {
+    background-color: #161616;
+    opacity: 0.8;
+    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(to right, #2d2d2d, #2d2d2d 0.5px, #161616 0.5px, #161616);
+}
+
+.bg--diagonal-line {
+    background-color: #161616;
+    /* opacity: 0.8; */
+    background: repeating-linear-gradient(-45deg, #2d2d2d, #2d2d2d 2px, #161616 2px, #161616 10px);
+}

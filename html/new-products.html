@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/output.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/CSSRulePlugin.min.js"></script> -->
+    <script type="module" src="/js/product.js"></script>
+    <title>week3_work / Products Page</title>
+</head>
+<body class="bg-gray-900 bg--diagonal-line text-indigo-50 font-poppings">
+
+    <div id="app">
+        <main class="container mx-auto p-3 h-screen">
+        <!-- section for table list -->
+            <div class="p-4  lg:overflow-x-auto">
+                <!-- <h2 class="text-3xl mb-3">產品列表</h2> -->
+                <div class="flex-row sm:flex justify-between sm:items-end">
+                    <h2 class="text-3xl mb-3">產品列表</h2>
+                    <button type="button" class="px-4 py-2 text-sm bg-sky-500 text-white rounded-none mb-3" 
+                        @click="modelMode='addNew'; isModelShow=true;">建立新商品
+                    </button>
+                </div>
+                <div class="rounded-lg text-center bg-gray-50">
+                    <div class="grid grid-cols-12 border-b-2 bg-blue-900 rounded-t-lg items-center">
+                        <span class="p-4 col-span-1">#</span>
+                        <span class="p-4 col-span-3 text-left">產品名稱</span>
+                        <span class="p-4 col-span-1 text-right">原價</span>
+                        <span class="p-4 col-span-1 text-right">售價</span>
+                        <span class="p-4 col-span-2">是否啟用</span>
+                        <span class="p-4 col-span-2">查看細節</span>
+                        <span class="p-4 col-span-2">編輯</span>
+                    </div>
+                    <ul class="divide-y-2 divide-gray-200">
+                        <li class="grid grid-cols-12 text-gray-700 items-center" v-for="(item,index) in products" 
+                            :key="item.title+index">
+                            <!-- <div class="p-4 col-span-1">{{ index }}</div> -->
+                            <div class="p-4 col-span-1" 
+                                :class="{'text-orange-500':index===0,'italic':index===0}">
+                                {{ index===0 ? 'New' : index  }}
+                            </div>
+                            <div class="p-4 col-span-3 text-left">{{ item.title }}</div>
+                            <div class="p-4 col-span-1 text-right">${{ new Intl.NumberFormat().format(item.origin_price) }}</div>
+                            <div class="p-4 col-span-1 text-right">${{ new Intl.NumberFormat().format(item.price) }}</div>
+                            <div class="p-4 col-span-2">
+                                <span class="text-green-500" v-if="item.is_enabled">啟用</span>
+                                <span class="text-red-500" v-else>未啟用</span>
+                            </div>
+                            <div class="p-4 col-span-2 sm:flex justify-center">
+                                <button type="button" class="flex-none bg-emerald-500 hover:bg-emerald-700 
+                                        focus:outline-none focus:ring-4 focus:ring-emerald-600 focus:ring-opacity-50 
+                                        text-white sm:px-4 py-1 sm:-my-4 rounded-md"
+                                    @click="getItem( item )">細節</button>
+                            </div>
+                            <div class="p-4 col-span-2 flex justify-center">
+                                <button type="button" class="flex-none hover:bg-yellow-500 border-2 border-yellow-500
+                                    focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-opacity-50
+                                    text-yellow-500 hover:text-white sm:px-4 py-1 sm:-my-4 rounded-l-md
+                                    border-r-orange-400"
+                                    @click="modelMode='edit'; itemEdit=modelProduct={...item}; isModelShow=true;">修改</button>
+
+                                <button type="button" class="flex-none hover:bg-red-500 border-2 border-red-500
+                                    focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 
+                                    text-red-500 hover:text-white sm:px-4 py-1 sm:-my-4 rounded-r-md 
+                                    border-l-0" @click="apiDeleteItem( item )">刪除</button>    
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex justify-end py-4">
+                    <span>目前有 {{ products.length }} 項產品</span>
+                </div>
+            </div>
+        <!-- section for detail -->
+            <div class="p-4">
+                <h3 class="text-3xl mb-3">單一產品細節</h3>
+
+                <div class="bg-gray-700 w-full rounded-lg flex p-6 justify-center opacity-80" v-if="!currentItem.id">
+                    <p class="text-xl text-white">請選擇任一商品查看</p>
+                </div>
+
+                <div class="bg-white w-full rounded-lg sm:flex mt-6 sm:mx-3 md:mx-0" v-else>
+                    <div
+                        class="flex-none w-full sm:w-44 md:w-48 xl:w-44 sm:h-60 md:h-full xl:h-60 sm:-mt-3 md:mt-0 lg:mt-0 xl:-mt-3 sm:-ml-3 md:ml-0 xl:-ml-3">
+                        <img id="productImg" :src="currentItem.imageUrl"
+                            class="w-full sm:h-full object-cover rounded-t-lg md:rounded-l-lg lg:rounded-lg" />
+                    </div>
+
+                    <div class="flex-auto p-6 text-gray-900">
+                        <div class="flex flex-wrap items-center mb-1">
+                            <h1 class="flex-auto text-xl md:text-4xl xl:text-xl">{{ currentItem.title }}</h1>
+                            <p class="text-gray-500">
+                                <span class="font-bold text-xl md:text-4xl xl:text-xl text-yellow-500 mr-1">${{
+                                    currentItem.price }}</span>
+                                <del class="text-xs">${{ currentItem.origin_price }}</del>
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-red-300 py-1 px-2 text-xs text-white rounded-full">{{
+                                currentItem.category }}</span>
+                            <div class="mb-3">
+                                <p class="text-gray-300 text-xs">
+                                    <span class="text-red-300 text-base">✩ </span>
+                                    <span class="text-red-300"> {{ currentItem.rating }}</span> (489)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-px mt-2 mb-6 bg-gray-200"></div>
+
+
+                        <div class="flex flex-col gap-2 2xl:mb-8 text-gray-600">
+                            <p class="text-sm"><span class="text-yellow-600">商品內容：</span>{{ currentItem.content }}
+                            </p>
+                            <p class="text-sm leading-6">{{ currentItem.description }}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+
+    <!-- Model -->
+        <div id="lightbox" class="invisible fixed inset-0 w-full h-full z-20 bg-gray-500 bg-opacity-50 overflow-y-auto">
+            <!-- @click.capture.self="isModelShow=false" -->
+            <div class="flex fx-center md:m-8"> <!-- 結構 -->
+                <div id="lightbox-content" class="scale-0 w-full bg-white shadow-lg text-gray-900 
+                    z-20 rounded-t-lg py-6 pt-0"> <!-- 內容 -->
+                    
+                    <header class="flex justify-start gap-8 items-center px-6 border-b bg-gray-800 text-indigo-50 
+                        rounded-t-lg">
+                        <h5>{{ modelMode === 'addNew' ? 'Add New Product' : 'Edit Product Mode' }}</h5>
+                        <button class="bg-pink-500 hover:bg-pink-600 focus:ring focus:ring-pink-400
+                        foucs:ring-4 py-1 px-4" @click="setSample" v-show="modelMode==='addNew'">Sample</button>
+                        <img src="../images/close_white_24dp.svg" alt="" 
+                            class="cursor-pointer inline-block p-8 -mr-6 transition-all duration-500 ease-in-out 
+                                origin-center  hover:rotate-180 ml-auto" @click.self="isModelShow=false">
+                    </header>
+                    <div class="px-6 py-12">
+                        <form action="" autocomplete="off" class="text-gray-500 w-full" 
+                            @submit.prevent="modelMode === 'addNew' ? apiAddNewProduct() : apiEditProduct()">
+                            <div class="grid grid-cols-5 gap-6">
+                            <!-- 1/2 -->
+                                <div class="grid grid-cols-2 col-span-5 lg:col-span-3 gap-y-8 gap-x-8 auto-rows-min">
+                                <!-- 標題 -->
+                                    <label for="titleInput" class="col-span-2 relative text-base">
+                                        <span class="text-blue-500">Title</span>
+                                        <input type="text" id="titleInput" placeholder="new item title"
+                                            class="input-style" v-model="modelProduct.title" required>
+                                        <span class="mt-2 invisible peer-invalid:visible text-pink-600 text-xs hidden">
+                                            Please provide a valid email address.</span>
+                                    </label>
+                                <!-- 分類 -->
+                                    <label for="categoryInput" class="col-span-2 md:col-span-1 relative text-base">
+                                        <span class="text-blue-500">Category</span>
+                                        <input type="text" id="categoryInput" placeholder="category"
+                                            class="input-style" v-model="modelProduct.category" required>
+                                    </label>
+                                <!-- 單位 -->
+                                    <label for="unitInput" class="col-span-2 md:col-span-1 relative text-base">
+                                        <span class="text-blue-500">Unit</span>
+                                        <select class="input-style" aria-label="Default select example" v-model="modelProduct.unit">
+                                            <!-- <option class="bg-gray-500 text-white" value="" disabled>- unit -</option> -->
+                                            <option v-for="item in unitArr" :value="item" :key="item">{{ item }}</option>
+                                        </select>
+                                    </label>
+                                    <!-- <label for="unitInput" class="col-span-2 md:col-span-1 relative text-base">
+                                        <span class="text-blue-500">Unit</span>
+                                        <input type="text" id="unitInput" placeholder="unit of item"
+                                            class="input-style" required>
+                                    </label> -->
+                                <!-- 原價 -->
+                                    <label for="priceInput" class="col-span-2 md:col-span-1 relative text-base">
+                                        <span class="text-blue-500">Price</span>
+                                        <input type="number" id="priceInput" placeholder="price"
+                                            class="input-style" min="0" 
+                                            v-model.number="modelProduct.origin_price" required>
+                                    </label>
+                                <!-- 特價 -->
+                                    <label for="dicountInput" class="col-span-2 md:col-span-1 relative text-base">
+                                        <!-- <span class="text-blue-500">Discount</span> -->
+                                        <div class="flex">
+                                            <span class="text-blue-500">Discount</span>
+                                            <span v-show="priceDiscount" 
+                                                :class="{ 'text-red-500':priceDiscount>0,
+                                                    'text-green-500':priceDiscount<0 }">
+                                                {{'（'}}        
+                                                {{ priceDiscount < 0 ? `${priceDiscount}%`: `+${priceDiscount}%` }}
+                                                {{'）'}}
+                                            </span>
+                                        </div>
+                                        <input type="number" id="dicountInput" placeholder="discount"
+                                            class="input-style" min="0" v-model.number="modelProduct.price" required>
+                                    </label>
+
+                                    <div class="hidden md:block col-span-2 w-full border-b-2 border-slate-200"></div>
+
+                                <!-- 產品描述 -->
+                                    <label for="describeInput" class="col-span-2 relative text-base">
+                                        <span class="text-blue-500">Description</span>
+                                        <textarea id="describeInput" rows="2" cols="50"
+                                            placeholder="Describe this product here..."
+                                            class="input-style" v-model="modelProduct.description"></textarea>
+                                    </label>
+                                <!-- 說明內容 -->
+                                    <label for="contentInput" class="col-span-2 relative text-base">
+                                        <span class="text-blue-500">Content</span>
+                                        <textarea rows="2" cols="50" id="contentInput" 
+                                            placeholder="請輸入說明內容..."
+                                            class="mt-1 px-3 py-3 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none 
+                                            focus:border-sky-100 focus:ring-sky-500/30 block w-full rounded-md 
+                                            sm:text-sm focus:ring-4 drop-shadow-sm focus:placeholder:invisible" 
+                                            v-model="modelProduct.content"></textarea>
+                                    </label>
+                                <!-- 是否啟用 -->
+                                    <label for="enabled-switcher" class="col-span-2 flex flex-wrap items-center cursor-pointer relative mb-4">
+                                        <input type="checkbox" id="enabled-switcher" class="sr-only" v-model="checkToActive">
+                                        <div class="switcher-bg bg-gray-400 border-2 border-gray-200 h-6 w-11 flex-none
+                                        rounded-full relative"></div>
+                                        <!-- <input type="checkbox" id="enabled-switcher" class="sr-only">
+                                        <div class="switcher-bg bg-gray-400 border-2 border-gray-200 h-6 w-11 flex-none
+                                        rounded-full"></div> -->
+                                        <span class="switcher-text ml-3 text-gray-400 text-sm font-medium flex-none">check to active</span>
+                                    </label>
+                                </div>
+
+                            <!-- 1/2 -->
+                            <!-- https://picsum.photos/id/1058/367/267 -->
+                            <!-- https://picsum.photos/id/1058/1024/768 -->
+                            <!-- https://picsum.photos/id/1077/200/500 -->
+                                <div class="grid grid-cols-2 col-span-5 lg:col-span-2 gap-y-8 gap-x-8 auto-rows-min">
+                                <!-- 主圖 -->
+                                    <label for="mainImgInput" class="col-span-2 relative text-base select-none">
+                                        <span class="text-blue-500">Main Photo</span>
+                                        <input type="text" id="mainImgInput" placeholder="please paste image link here"
+                                            class="input-style" v-model="modelProduct.imageUrl" ></label>
+                                    </label>
+                                    <div class="col-span-2 text-blue-300">
+                                        <div class="rounded-lg bg-no-photo outline-4 outline-gray-300"
+                                            :class="[isMainPhotoSuccess ? '': 'outline-dashed']">
+                                            <div class="w-full aspect-video rounded-lg flex fx-center">
+                                                <span class="text-yellow-500 text-xl px-4 text-center font-bold" 
+                                                    v-show="!isMainPhotoSuccess">
+                                                    Paste Image URL In The Text Field Above</span>
+                                                <img :src="modelProduct.imageUrl" 
+                                                    class="aspect-video w-full object-cover rounded-lg" 
+                                                    @load="loadPhotoSuccess" @error="loadPhotoError" v-show="isMainPhotoSuccess">
+                                            </div>
+                                        </div>
+                                    </div>
+                                <!-- 新增次圖 -->
+                                    <div class="col-span-2" v-if="modelMode==='addNew'">
+                                        <!-- 新增上傳 -->
+                                        <div class="">
+                                            <div class="flex gap-2">
+                                                <span class="text-blue-500">Other Images</span>
+                                                <span 
+                                                    :class="{'text-red-500':uploadStatus=='fail','text-green-500':uploadStatus=='success'}" 
+                                                    v-show="uploadStatus=='success'||'fail'">
+                                                    {{ uploadMessage }}</span>
+                                                <img src="/images/refresh_black_24dp.svg" 
+                                                    class="animate-spin opacity-30 text-blue-600" v-show="uploadStatus=='uploading'">
+                                            </div>
+                                            <div class="upload-box">
+                                                <div class="h-full w-full border-4 border-gray-300 border-dashed">
+                                                    <div class="h-full w-full bg-contain bg-no-repeat bg-center opacity-30 relative
+                                                        hover:bg-green-300"
+                                                        style="background-image: url(/images/cloud_upload_black_48dp.svg);">
+
+                                                        <input type="file" id="file" placeholder="drag a file here"         
+                                                            name="file-to-upload"       
+                                                            @change="apiUploadFile"
+                                                            class="absolute w-full h-full outline-none cursor-pointer opacity-0">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- 已上傳圖 -->
+                                        <div class="">
+                                            <div class="md:flex flex-wrap">
+                                                <template v-for="(item,i) in modelProduct.imagesUrl" :key="item+i">
+                                                    <div class="rounded-lg p-2 flex-auto max-w-full min-w-[50%] cursor-pointer" 
+                                                        v-if="modelProduct.imagesUrl.length > 0" @click="removeUpload(i)">
+                                                        <div class="relative">
+                                                            <img :src="item" class="h-24 w-full object-cover rounded-lg" >
+                                                            <div class="rounded-lg absolute w-full h-full inset-0 bg-contain bg-no-repeat   
+                                                                bg-center hover:bg-black hover:opacity-50 opacity-0"
+                                                                style="background-image: url(/images/delete_white_24dp.svg);"></div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <!-- Edit 次圖 -->
+                                    <div class="col-span-2" v-else>
+                                        <!-- 上傳 Edit -->
+                                        <span class="text-blue-500">Add More Image</span>
+                                        <div class="flex mt-1">
+                                            <label for="editAddMore" class="col-span-2 relative text-base select-none w-full">
+                                                <input type="text" id="editAddMore" placeholder="please paste image link here"
+                                                class="p-3 bg-white border shadow-sm border-slate-300 placeholder-slate-400 focus:outline-none
+                                                focus:border-sky-100 block w-full rounded-l-md 
+                                                sm:text-sm drop-shadow-sm focus:placeholder:invisible" 
+                                                v-model="editAddImg"></label>
+                                            </label>
+                                            <button type="button" class="px-6 py-3 bg-white border shadow-sm border-slate-300 border-l-0 focus:bg-zinc-100 rounded-r-md sm:text-sm 
+                                            hover:bg-sky-100 drop-shadow-sm"
+                                            @click="editImgToArr">+</button>
+                                        </div>
+                                        <template v-for="(item,i) in modelProduct.imagesUrl" :key="item+i">
+                                            <div class="w-full border-t-2 border-slate-200 md:my-6"></div>
+                                            <label :for=`multiImg-${i}` class="col-span-2 relative text-base select-none">
+                                                <input type="text" :id=`multiImg-${i}` placeholder="please paste image link here"
+                                                class="input-style" v-model="modelProduct.imagesUrl[i]" ></label>
+                                            </label>
+                                            <div class="rounded-lg my-4 flex-auto max-w-full min-w-[50%] cursor-pointer" 
+                                                v-show="modelProduct.imagesUrl[i]" @click="removeUpload(i)">
+                                                <div class="relative">
+                                                    <img :src="item" class="h-24 w-full object-cover rounded-lg" >
+                                                    <div class="rounded-lg absolute w-full h-full inset-0 bg-contain 
+                                                        bg-no-repeat bg-center hover:bg-black hover:opacity-50 opacity-0"
+                                                        style="background-image: url(/images/delete_white_24dp.svg);">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        </template>
+
+                                        <!-- <div class="">
+                                            
+                                        </div> -->
+                                    </div>
+                                    
+                                    
+                                    <!-- <div class="col-span-2 flex gap-4 justify-end">
+                                        <button type="button" class="bg-gray-600 text-white text-sm leading-6 font-medium py-2 px-3 rounded-lg">Cancel</button>
+                                        <button type="button" class="bg-blue-600 text-white text-sm leading-6 font-medium py-2 px-3 rounded-lg">Confirm</button>
+                                    </div> -->
+                                </div>
+
+
+                            </div>
+                            <div class="w-full border-t-2 border-slate-200 my-4 py-8">
+
+                                <div class="flex gap-4 justify-end items-baseline">
+                                    <div class="flex gap-1 items-center" v-show="saveStatus=='success'">
+                                        <span class="text-green-500">建立成功</span>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        class="bg-gray-600 text-white leading-6 font-medium py-2 px-6         
+                                            rounded-full focus:ring-4  ring-gray-300" 
+                                        @click.self="isModelShow=false">Close</button>
+                                    <button 
+                                        type="submit" 
+                                        class="bg-blue-600 text-white leading-6 font-medium py-2 px-6 
+                                            rounded-full focus:ring-4 ring-blue-300"
+                                        :class="{'bg-green-500':saveStatus=='success','ring-green-300':saveStatus=='success',
+                                            'bg-yellow-500':saveStatus=='saving','ring-yellow-300':saveStatus=='saving'}">
+                                        {{ saveStatus }}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>  
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+</body>
+</html>
